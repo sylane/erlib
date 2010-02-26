@@ -4,11 +4,11 @@
 %%             TODO: Add url path parameters parsing / formating
 %% @since      Dec 05, 2009
 %% @version    1.0
-%% @copyright  (c) 2009, Sébastien Merle <s.merle@gmail.com>
-%% @authors    Sébastien Merle <s.merle@gmail.com>
+%% @copyright  (c) 2009, SÃ©bastien Merle <s.merle@gmail.com>
+%% @authors    SÃ©bastien Merle <s.merle@gmail.com>
 %% @end
 %%
-%% Copyright (c) 2009, Sébastien Merle <s.merle@gmail.com>
+%% Copyright (c) 2009, SÃ©bastien Merle <s.merle@gmail.com>
 %% All rights reserved.
 %%
 %% Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 %% ===========================================================================
 
 -module(url).
--author('Sébastien Merle <s.merle@gmail.com>').
+-author('SÃ©bastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
 %% Includes
