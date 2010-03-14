@@ -2,11 +2,11 @@
 %% @doc        TODO: Add module optlib documentation.
 %% @since      Nov 28, 2009
 %% @version    1.0
-%% @copyright  (c) 2009, Sébastien Merle <s.merle@gmail.com>
-%% @authors    Sébastien Merle <s.merle@gmail.com>
+%% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
+%% @authors    Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
-%% Copyright (c) 2009, Sébastien Merle <s.merle@gmail.com>
+%% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
 %% All rights reserved.
 %%
 %% Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 %% ===========================================================================
 
 -module(optlib).
--author('Sébastien Merle <s.merle@gmail.com>').
+-author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
 %% Includes
