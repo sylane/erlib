@@ -151,7 +151,7 @@ publish(Lvl, Msg, Vars, Ctx) -> console_logging(Lvl, Msg, Vars, Ctx).
 %% adding a context record that contains information like file, function
 %% arity and line number.
 %% --------------------------------------------------------------------
-parse_transform(Ast, Options) ->
+parse_transform(Ast, _Options) ->
     {NewAST, _NewCtx} = parse_ast(Ast, #ctx{}),
     NewAST.
 
@@ -481,8 +481,8 @@ parse_funclause({clause, Line, Head, Guards, Exprs}, Ctx) ->
     end.
 
 erlog_call(Fun, Args, Ctx) when
-  Fun =:= log; Fun =:= debu; Fun =:= info; Fun =:= warn; Fun =:= error ->
-    LvlDiff = lvl2pri(Ctx#ctx.level) - lvl2pri(Fun),
+  Fun =:= log; Fun =:= debug; Fun =:= info; Fun =:= warn; Fun =:= error ->
+	LvlDiff = lvl2pri(Ctx#ctx.level) - lvl2pri(Fun),
     if LvlDiff >= 0 -> erlog_publish(Fun, Args, Ctx);
        true -> {none, Ctx}
     end;
