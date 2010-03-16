@@ -287,8 +287,8 @@ parse_function(Name, Arity, Clauses, Ctx) ->
         {NewClauses, NewCtx} ->
             {NewClauses, NewCtx#ctx{function=Ctx#ctx.function,
                                     arity=Ctx#ctx.arity,
-                                    fun_index=undefined,
-                                    fun_arity=undefined}}
+                                    fun_index=0,
+                                    fun_arity=0}}
     end.
 
 parse_clauses([], [], Ctx) ->
