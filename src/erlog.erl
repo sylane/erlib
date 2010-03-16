@@ -234,7 +234,7 @@ gen_log_context(Ctx, Acc) when
     gen_log_reverse([CtxStr | Acc], []);
 gen_log_context(Ctx, Acc) ->
     CtxStr = io_lib:format(?CTX_FMT,
-                           [Ctx#ctx.file, Ctx#ctx.function,
+                           [Ctx#ctx.module, Ctx#ctx.function,
                             Ctx#ctx.arity, Ctx#ctx.line]),
     gen_log_reverse([CtxStr | Acc], []).
 
