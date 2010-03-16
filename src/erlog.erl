@@ -79,7 +79,7 @@
 -define(PID_FMT, "~-10w").
 -define(CAT_FMT, "~-12s").
 -define(NAME_FMT, "~-12s").
--define(TIME_FMT, "~-24s").
+-define(TIME_FMT, "~-26s").
 -define(CTX_FMT, "(~s:~s/~w:~w)").
 -define(CTX_FUN_FMT, "(~s:~s/~w:~w/~w:~w)").
 
