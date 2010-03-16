@@ -65,7 +65,8 @@ now() ->
 %% TODO: Add description of function to_string/1
 %% --------------------------------------------------------------------
 to_string({{Y, M, D}, {H, Mi, S}, MS}) ->
-    io_lib:format("~w/~w/~w ~w:~w:~w,~w", [Y, M, D, H, Mi, S, MS]).
+    io_lib:format("~4..0B/~2..0B/~2..0B ~2..0B:~2..0B:~2..0B,~6..0B",
+				  [Y, M, D, H, Mi, S, MS]).
 
 %% ====================================================================
 %% Local Functions
