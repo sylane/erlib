@@ -152,8 +152,8 @@ publish(Lvl, Msg, Vars, Ctx) -> console_logging(Lvl, Msg, Vars, Ctx).
 %% arity and line number.
 %% --------------------------------------------------------------------
 parse_transform(Ast, _Options) ->
-    {NewAST, _NewCtx} = parse_ast(Ast, #ctx{}),
-    NewAST.
+	{NewAst, _NewCtx} = parse_ast(Ast, #ctx{}),
+	NewAst.
 
 
 %% ====================================================================
@@ -443,6 +443,8 @@ parse_try_final(Line, Try, none, Catch, none, Ctx) ->
     {{'try', Line, Try, [], Catch, []}, Ctx};
 parse_try_final(Line, Try, none, none, After, Ctx) ->
     {{'try', Line, Try, [], [], After}, Ctx};
+parse_try_final(Line, Try, Case, Catch, none, Ctx) ->
+    {{'try', Line, Try, Case, Catch, []}, Ctx};
 parse_try_final(Line, Try, Case, Catch, After, Ctx) ->
     {{'try', Line, Try, Case, Catch, After}, Ctx}.
 
