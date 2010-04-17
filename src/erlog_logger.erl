@@ -208,7 +208,10 @@ gen_log_msg(#erlog_entry{msg = Msg, vars = undefined} = Entry,
     gen_log_context(Entry, Headers, NewBody, Footers);
 gen_log_msg(#erlog_entry{msg = Msg, vars = Vars} = Entry,
             Headers, Body, Footers) ->
-    NewMsg = io_lib:format(Msg, Vars),
+    NewMsg = try io_lib:format(Msg, Vars)
+             catch error:badarg ->
+                       io_lib:format("BAD FORMAT: \"~s\" / ~w", [Msg, Vars])
+             end,
     NewBody = lists:reverse(re:split(NewMsg, "\n"), Body),
     gen_log_context(Entry, Headers, NewBody, Footers).
 
