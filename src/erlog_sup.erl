@@ -1,4 +1,11 @@
 %% ===========================================================================
+%% @doc        Erlog logger process supervisor.
+%% @since      Apr 17, 2010
+%% @version    1.0
+%% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
+%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @end
+%%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
 %% All rights reserved.
 %%
@@ -27,28 +34,46 @@
 %% POSSIBILITY OF SUCH DAMAGE.
 %% ===========================================================================
 
--ifndef(IS_ERLOG_INCLUDED).
--define(IS_ERLOG_INCLUDED, true).
+-module(erlog_sup).
 
--ifndef(NO_ERLOG_PARSE_TRANSFORM).
-%% Activate parse transform
--compile({parse_transform, erlog}).
--endif.
+-author('Sebastien Merle <s.merle@gmail.com>').
+
+-behaviour(supervisor).
 
 %% --------------------------------------------------------------------
-%% Records
+%% Exports
 %% --------------------------------------------------------------------
 
--record(erlog_entry, {level, pid, proc_cat, proc_name,
-                      log_time, msg, vars, ctx}).
+%% Startup exports
+-export([start_link/0]).
 
--record(erlog_ctx, {category, max_level = log, file, module, line,
-                    function, arity, fun_index = 0, fun_arity = 0}).
+%% Behaviour supervisor callbacks
+-export([init/1]).
+
+
+%% ====================================================================
+%% Startup Functions
+%% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Global Specs
+%% Starts and links the logging process supervisor.
 %% --------------------------------------------------------------------
+start_link() -> supervisor:start_link(?MODULE, {}).
 
--type log_level() :: log | debug | info | warn | error.
 
--endif.
+%% ====================================================================
+%% Behaviour supervisor Functions
+%% ====================================================================
+
+%% --------------------------------------------------------------------
+%% Called whenever the supervisor is started.
+%% --------------------------------------------------------------------
+init({}) ->
+    LoggerSpec = {erlog_logger, {erlog_logger, start_link, []},
+                  permanent, 2000, worker, [erlog_logger]},
+    {ok, {{one_for_all, 1, 1}, [LoggerSpec]}}.
+
+
+%% ====================================================================
+%% Internal Functions
+%% ====================================================================

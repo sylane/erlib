@@ -1,0 +1,10 @@
+{application, erlog,
+  [{description,  "Erlang Line Logger"},
+   {id,           "erlog"},
+   {vsn,          "0.1"},
+   {modules,      [erlog]},
+   {registered,   []},
+   {included_applications, []},
+   {applications, [kernel, stdlib]},
+   {env,          []},
+   {mod,          {erlog, []}}]}.

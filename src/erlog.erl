@@ -1,16 +1,17 @@
 %% ===========================================================================
-%% @doc        Logging module the use erlang parse_transform to log context
-%%             information like file, funtion, arity, and line number along
-%%             with the log level, pid and time.
+%% @doc        Erlang line logger.
+%%             Uses erlang parse_transform to log context information like
+%%             file, funtion, arity, and line number along with the log level,
+%%             pid and time.
 %%             A log category can be specified with the module attribute
 %%             erlog_category or set at runtime for the active process.
 %%             The category will be used in the futur to filter the log lines
 %%             at runtime.
 %%             A log name can be specified at runtime for the active process
 %%             to differentiate the log entries.
-%%             The module attribute erlog_level can be set to remove
+%%             The module attribute erlog_max_level can be set to remove
 %%             the log function calls at build time when the log level
-%%             priority is higher than the specified one.
+%%             is higher than the specified one.
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -28,7 +29,7 @@
 %%   * Redistributions in binary form must reproduce the above copyright
 %%     notice, this list of conditions and the following disclaimer in the
 %%     documentation and/or other materials provided with the distribution.
-%%   * Neither the name of "eflusion" nor the names of its contributors may be
+%%   * Neither the name of "erlib" nor the names of its contributors may be
 %%     used to endorse or promote products derived from this software without
 %%     specific prior written permission.
 %%
@@ -46,19 +47,33 @@
 %% ===========================================================================
 
 -module(erlog).
+
 -author('Sebastien Merle <s.merle@gmail.com>').
+
+-behaviour(application).
 
 %% --------------------------------------------------------------------
 %% Includes
 %% --------------------------------------------------------------------
+
+-define(NO_ERLOG_PARSE_TRANSFORM, true).
+-include("erlog.hrl").
 
 %% --------------------------------------------------------------------
 %% Exports
 %% --------------------------------------------------------------------
 
 %% API exports
--export([parse_transform/2]).
--export([set_category/1, set_name/1]).
+-export([start/0,
+         stop/0,
+         set_category/1,
+         set_name/1,
+         lvl2lbl/1,
+         lvl2num/1]).
+
+%% Behaviour application callbacks
+-export([start/2,
+         stop/1]).
 
 %% Compatibility exports
 -export([log/1, log/2]).
@@ -68,38 +83,25 @@
 -export([error/1, error/2]).
 
 %% Private exports
--export([publish/3, publish/4]).
-
-%% --------------------------------------------------------------------
-%% Constants
-%% --------------------------------------------------------------------
-
--define(LOG_SEP, " ").
--define(LVL_FMT, "~-5s").
--define(PID_FMT, "~-10w").
--define(CAT_FMT, "~-12s").
--define(NAME_FMT, "~-12s").
--define(TIME_FMT, "~-26s").
--define(CTX_FMT, "(~s:~s/~w:~w)").
--define(CTX_FUN_FMT, "(~s:~s/~w:~w/~w:~w)").
-
-%% --------------------------------------------------------------------
-%% Records
-%% --------------------------------------------------------------------
-
--record(ctx, {category, level = log, file, module, line,
-              function, arity, fun_index = 0, fun_arity = 0}).
-
-%% --------------------------------------------------------------------
-%% Global Specs
-%% --------------------------------------------------------------------
-
--type log_level() :: log | debug | info | warn | error.
+-export([parse_transform/2,
+         publish/3, publish/4]).
 
 
 %% ====================================================================
 %% API Functions
 %% ====================================================================
+
+%% --------------------------------------------------------------------
+%% Starts the erlog application.
+-spec start() -> ok | {error, Reason::term()}.
+%% --------------------------------------------------------------------
+start() -> application:start(erlog).
+
+%% --------------------------------------------------------------------
+%% Stops the erlog application.
+-spec stop() -> ok | {error, Reason::term()}.
+%% --------------------------------------------------------------------
+stop() -> application:stop(erlog).
 
 %% --------------------------------------------------------------------
 %% Override the module log category for the active process.
@@ -120,30 +122,60 @@ set_name(Name) ->
     put(erlog_name, Name).
 
 %% --------------------------------------------------------------------
+%% Gives a string label for the specified logging level.
+%% --------------------------------------------------------------------
+lvl2lbl(log) -> "LOG";
+lvl2lbl(debug) -> "DEBUG";
+lvl2lbl(info) -> "INFO";
+lvl2lbl(warn) -> "WARN";
+lvl2lbl(error) -> "ERROR";
+lvl2lbl(none) -> "NONE".
+
+%% --------------------------------------------------------------------
+%% Gives the logging level as an integer.
+%% --------------------------------------------------------------------
+lvl2num(log) -> 5;
+lvl2num(debug) -> 4;
+lvl2num(info) -> 3;
+lvl2num(warn) -> 2;
+lvl2num(error) -> 1;
+lvl2num(none) -> 0.
+
+%% --------------------------------------------------------------------
 %% Compatibility functions used when parse_transform has not been used.
 %% --------------------------------------------------------------------
-log(Msg) -> publish(log, Msg, none, none).
-log(Msg, Vars) -> publish(log, Msg, Vars, none).
-debug(Msg) -> publish(debug, Msg, none, none).
-debug(Msg, Vars) -> publish(debug, Msg, Vars, none).
-info(Msg) -> publish(info, Msg, none, none).
-info(Msg, Vars) -> publish(info, Msg, Vars, none).
-warn(Msg) -> publish(warn, Msg, none, none).
-warn(Msg, Vars) -> publish(warn, Msg, Vars, none).
-error(Msg) -> publish(error, Msg, none, none).
-error(Msg, Vars) -> publish(error, Msg, Vars, none).
+log(Msg) -> publish(log, Msg, undefined).
+log(Msg, Vars) -> publish(log, Msg, Vars, undefined).
+debug(Msg) -> publish(debug, Msg, undefined).
+debug(Msg, Vars) -> publish(debug, Msg, Vars, undefined).
+info(Msg) -> publish(info, Msg, undefined).
+info(Msg, Vars) -> publish(info, Msg, Vars, undefined).
+warn(Msg) -> publish(warn, Msg, undefined).
+warn(Msg, Vars) -> publish(warn, Msg, Vars, undefined).
+error(Msg) -> publish(error, Msg, undefined).
+error(Msg, Vars) -> publish(error, Msg, Vars, undefined).
 
 %% --------------------------------------------------------------------
 %% Functions publish/3 calls are generated by the parse_transform.
--spec publish(log_level(), string(), #ctx{}) -> any().
+-spec publish(log_level(), string(), #erlog_ctx{}) -> any().
 %% --------------------------------------------------------------------
-publish(Lvl, Msg, Ctx) -> console_logging(Lvl, Msg, none, Ctx).
+publish(Lvl, Msg, Ctx) ->
+    publish(Lvl, Msg, undefined, Ctx).
 
 %% --------------------------------------------------------------------
 %% Functions publish/3 calls are generated by the parse_transform.
--spec publish(log_level(), string(), list(), #ctx{}) -> any().
+-spec publish(log_level(), string(), list(), #erlog_ctx{}) -> any().
 %% --------------------------------------------------------------------
-publish(Lvl, Msg, Vars, Ctx) -> console_logging(Lvl, Msg, Vars, Ctx).
+publish(Lvl, Msg, Vars, Ctx) ->
+    Entry = #erlog_entry{level = Lvl,
+                         pid = self(),
+                         proc_cat = get(erlog_category),
+                         proc_name = get(erlog_name),
+                         log_time = timelib:now(),
+                         msg = Msg,
+                         vars = Vars,
+                         ctx = Ctx},
+    gen_server:cast(erlog, {log, Entry}).
 
 %% --------------------------------------------------------------------
 %% Parses a module AST and changes the remote calls to the erlog module's
@@ -152,95 +184,28 @@ publish(Lvl, Msg, Vars, Ctx) -> console_logging(Lvl, Msg, Vars, Ctx).
 %% arity and line number.
 %% --------------------------------------------------------------------
 parse_transform(Ast, _Options) ->
-	{NewAst, _NewCtx} = parse_ast(Ast, #ctx{}),
-	NewAst.
+  {NewAst, _NewCtx} = parse_ast(Ast, #erlog_ctx{}),
+  NewAst.
+
+
+%% ====================================================================
+%% Behaviour application Functions
+%% ====================================================================
+
+%% --------------------------------------------------------------------
+%% Called whenever the application is started.
+%% --------------------------------------------------------------------
+start(_Type, []) -> erlog_sup:start_link().
+
+%% --------------------------------------------------------------------
+%% Called whenever the application has stopped.
+%% --------------------------------------------------------------------
+stop(_State) -> ok.
 
 
 %% ====================================================================
 %% Local Functions
 %% ====================================================================
-
-lvl2lbl(log) -> "LOG";
-lvl2lbl(debug) -> "DEBUG";
-lvl2lbl(info) -> "INFO";
-lvl2lbl(warn) -> "WARN";
-lvl2lbl(error) -> "ERROR".
-
-lvl2pri(log) -> 5;
-lvl2pri(debug) -> 4;
-lvl2pri(info) -> 3;
-lvl2pri(warn) -> 2;
-lvl2pri(error) -> 1.
-
-console_logging(Lvl, Msg, Vars, Ctx) ->
-    console_log_line(gen_log_line(Lvl, Msg, Vars, Ctx)).
-
-console_log_line(Line) -> io:format("~s~n", [Line]).
-
-tostr_ifdef(Val) ->
-    case Val of
-        undefined -> "";
-        Any -> io_lib:format("~w", [Any])
-    end.
-
-get_default(Key, Default) ->
-    case get(Key) of
-        undefined -> Default;
-        Any -> Any
-    end.
-
-gen_log_line(Lvl, Msg, Vars, Ctx) -> gen_log_level(Lvl, Msg, Vars, Ctx, []).
-
-gen_log_level(Lvl, Msg, Vars, Ctx, Acc) ->
-    NewAcc = [io_lib:format(?LVL_FMT, [lvl2lbl(Lvl)]) | Acc],
-    gen_log_pid(Msg, Vars, Ctx, NewAcc).
-
-gen_log_pid(Msg, Vars, Ctx, Acc) ->
-    NewAcc = [io_lib:format(?PID_FMT, [self()]) | Acc],
-    gen_log_category(Msg, Vars, Ctx, NewAcc).
-
-gen_log_category(Msg, Vars, none, Acc) ->
-    Category = tostr_ifdef(get(erlog_category)),
-    NewAcc = [io_lib:format(?CAT_FMT, [Category]) | Acc],
-    gen_log_name(Msg, Vars, none, NewAcc);
-gen_log_category(Msg, Vars, Ctx, Acc) ->
-    Category = tostr_ifdef(get_default(erlog_category, Ctx#ctx.category)),
-    NewAcc = [io_lib:format(?CAT_FMT, [Category]) | Acc],
-    gen_log_name(Msg, Vars, Ctx, NewAcc).
-
-gen_log_name(Msg, Vars, Ctx, Acc) ->
-    Name = tostr_ifdef(get(erlog_name)),
-    NewAcc = [io_lib:format(?NAME_FMT, [Name]) | Acc],
-    gen_log_time(Msg, Vars, Ctx, NewAcc).
-
-gen_log_time(Msg, Vars, Ctx, Acc) ->
-    NowStr = timelib:to_string(timelib:now()),
-    NewAcc = [io_lib:format(?TIME_FMT, [NowStr]) | Acc],
-    gen_log_msg(Msg, Vars, Ctx, NewAcc).
-
-gen_log_msg(Msg, none, Ctx, Acc) ->
-    gen_log_context(Ctx, [Msg | Acc]);
-gen_log_msg(Msg, Vars, Ctx, Acc) ->
-    gen_log_context(Ctx, [io_lib:format(Msg, Vars) | Acc]).
-
-gen_log_context(none, Acc) ->
-  gen_log_reverse(Acc, []);
-gen_log_context(Ctx, Acc) when
-  Ctx#ctx.fun_index > 0 ->
-    CtxStr = io_lib:format(?CTX_FUN_FMT,
-                           [Ctx#ctx.file, Ctx#ctx.function,
-                            Ctx#ctx.arity, Ctx#ctx.fun_index,
-                            Ctx#ctx.fun_arity, Ctx#ctx.line]),
-    gen_log_reverse([CtxStr | Acc], []);
-gen_log_context(Ctx, Acc) ->
-    CtxStr = io_lib:format(?CTX_FMT,
-                           [Ctx#ctx.module, Ctx#ctx.function,
-                            Ctx#ctx.arity, Ctx#ctx.line]),
-    gen_log_reverse([CtxStr | Acc], []).
-
-gen_log_reverse([], Acc) -> Acc;
-gen_log_reverse([H |T], []) -> gen_log_reverse(T, [H]);
-gen_log_reverse([H |T], Acc) -> gen_log_reverse(T, [H, ?LOG_SEP |Acc]).
 
 %% AST parse and transform
 
@@ -259,14 +224,24 @@ parse_forms([Form |Forms], Acc, Ctx) ->
     end.
 
 parse_form({attribute, Line, module, Mod}, Ctx) ->
-    {{attribute, Line, module, Mod}, Ctx#ctx{module = Mod}};
+    {{attribute, Line, module, Mod}, Ctx#erlog_ctx{module = Mod}};
 parse_form({attribute, Line, file, {File, Line}}, Ctx) ->
     AbsFile = pathlib:absname(File),
-    {{attribute, Line, file, {File, Line}}, Ctx#ctx{file=AbsFile}};
+    {{attribute, Line, file, {File, Line}}, Ctx#erlog_ctx{file=AbsFile}};
 parse_form({attribute, _Line, erlog_category, Category}, Ctx) ->
-    {none, Ctx#ctx{category=Category}};
-parse_form({attribute, _Line, erlog_level, Level}, Ctx) ->
-    {none, Ctx#ctx{level=Level}};
+    {none, Ctx#erlog_ctx{category=Category}};
+parse_form({attribute, _Line, erlog_max_level, Level},
+           #erlog_ctx{max_level = MaxLevel} = Ctx) when
+  Level =:= log; Level =:= debug; Level =:= info;
+  Level =:= warn; Level =:= error; Level =:= none ->
+    CurrMaxPri = lvl2num(MaxLevel),
+    NewPri = lvl2num(Level),
+    if NewPri < CurrMaxPri -> {none, Ctx#erlog_ctx{max_level=Level}};
+       true -> {none, Ctx}
+    end;
+parse_form({attribute, Line, erlog_max_level, L}, _Ctx) ->
+    Msg = io_lib:format("Invalid maximum logging level: ~w", [L]),
+    {error, {Line, erl_parse, [Msg]}};
 parse_form({attribute, Line, Attr, Val}, Ctx) ->
     {{attribute,Line,Attr,Val}, Ctx};
 parse_form({function, Line, Name, Arity, Clauses}, Ctx) ->
@@ -280,13 +255,13 @@ parse_form(Other, Ctx) ->
     {Other, Ctx}.
 
 parse_function(Name, Arity, Clauses, Ctx) ->
-    FunCtx = Ctx#ctx{function=Name, arity=Arity},
+    FunCtx = Ctx#erlog_ctx{function=Name, arity=Arity},
     case parse_clauses(Clauses, [], FunCtx) of
         {error, Error} -> {error, Error};
         {none, NewCtx} -> {none, NewCtx};
         {NewClauses, NewCtx} ->
-            {NewClauses, NewCtx#ctx{function=Ctx#ctx.function,
-                                    arity=Ctx#ctx.arity,
+            {NewClauses, NewCtx#erlog_ctx{function=Ctx#erlog_ctx.function,
+                                    arity=Ctx#erlog_ctx.arity,
                                     fun_index=0,
                                     fun_arity=0}}
     end.
@@ -373,9 +348,9 @@ parse_expression({'try', Line, Try, Case, Catch, After}, Ctx) ->
 parse_expression({'fun', Line, Body}, Ctx) ->
     case Body of
         {clauses, Clauses} ->
-            FunCtx = Ctx#ctx{fun_index=Ctx#ctx.fun_index+1},
+            FunCtx = Ctx#erlog_ctx{fun_index=Ctx#erlog_ctx.fun_index+1},
             {NewClauses, NewCtx} = parse_funclauses(Clauses, [], FunCtx),
-            ResCtx = NewCtx#ctx{fun_index=Ctx#ctx.fun_index},
+            ResCtx = NewCtx#erlog_ctx{fun_index=Ctx#erlog_ctx.fun_index},
             {{'fun', Line, {clauses, NewClauses}}, ResCtx};
         {function, F, A} ->
             {{'fun', Line, {function, F, A}}, Ctx};
@@ -449,7 +424,7 @@ parse_try_final(Line, Try, Case, Catch, After, Ctx) ->
     {{'try', Line, Try, Case, Catch, After}, Ctx}.
 
 parse_call({remote, L1, {atom, L2, erlog}, {atom, L3, Fun}}, Args, Ctx) ->
-    case erlog_call(Fun, Args, Ctx#ctx{line=L3}) of
+    case erlog_call(Fun, Args, Ctx#erlog_ctx{line=L3}) of
         {error, Error} -> {error, Error};
         {none, NewCtx} -> {none, NewCtx};
         {NewFun, NewArgs, NewCtx} ->
@@ -472,47 +447,49 @@ parse_funclauses([Clause |Clauses], Acc, Ctx) ->
     end.
 
 parse_funclause({clause, Line, Head, Guards, Exprs}, Ctx) ->
-    FunCtx = Ctx#ctx{fun_arity = length(Head)},
+    FunCtx = Ctx#erlog_ctx{fun_arity = length(Head)},
     case parse_expressions(Exprs, [], FunCtx) of
             {error, Error} -> {error, Error};
             {none, NewCtx} ->
-                {none, NewCtx#ctx{fun_arity = Ctx#ctx.fun_arity}};
+                {none, NewCtx#erlog_ctx{fun_arity = Ctx#erlog_ctx.fun_arity}};
             {NewExprs, NewCtx} ->
-                RevCtx = NewCtx#ctx{fun_arity = Ctx#ctx.fun_arity},
+                RevCtx = NewCtx#erlog_ctx{fun_arity = Ctx#erlog_ctx.fun_arity},
                 {{clause, Line, Head, Guards, NewExprs}, RevCtx }
     end.
 
 erlog_call(Fun, Args, Ctx) when
   Fun =:= log; Fun =:= debug; Fun =:= info; Fun =:= warn; Fun =:= error ->
-	LvlDiff = lvl2pri(Ctx#ctx.level) - lvl2pri(Fun),
+  LvlDiff = lvl2num(Ctx#erlog_ctx.max_level) - lvl2num(Fun),
     if LvlDiff >= 0 -> erlog_publish(Fun, Args, Ctx);
        true -> {none, Ctx}
     end;
 erlog_call(Fun, Args, Ctx) when
-  Fun =:= set_name; Fun =:= set_category ->
+  Fun =:= set_name; Fun =:= set_category;
+  Fun =:= start; Fun =:= stop;
+  Fun =:= lvl2lbl; Fun =:= lvl2pri ->
     {Fun, Args, Ctx};
-erlog_call(publish, _Args, #ctx{line=Line}) ->
+erlog_call(publish, _Args, #erlog_ctx{line=Line}) ->
     Msg = "Function erlog:publish should not be called directly",
     {error, {Line, erl_parse, [Msg]}};
-erlog_call(Fun, _Args, #ctx{line=Line}) ->
+erlog_call(Fun, _Args, #erlog_ctx{line=Line}) ->
     Msg = io_lib:format("Invalid logging category: '~w'", [Fun]),
     {error, {Line, erl_parse, [Msg]}}.
 
-erlog_publish(Fun, [Msg], #ctx{line=Line} = Ctx) ->
+erlog_publish(Fun, [Msg], #erlog_ctx{line=Line} = Ctx) ->
     {publish, [{atom, Line, Fun}, Msg, context_ast(Line, Ctx)], Ctx};
-erlog_publish(Fun, [Msg, Vars], #ctx{line=Line} = Ctx) ->
+erlog_publish(Fun, [Msg, Vars], #erlog_ctx{line=Line} = Ctx) ->
     {publish, [{atom, Line, Fun}, Msg, Vars, context_ast(Line, Ctx)], Ctx};
-erlog_publish(_Fun, _Args, #ctx{line=Line}) ->
+erlog_publish(_Fun, _Args, #erlog_ctx{line=Line}) ->
     {error, {Line, erl_parse, ["Invalid logging arguments"]}}.
 
 context_ast(Line, Ctx) ->
-    {tuple, Line, [{atom, Line, ctx},
-                   {atom, Line, Ctx#ctx.category},
-                   {atom, Line, Ctx#ctx.level},
-                   {string, Line, Ctx#ctx.file},
-                   {atom, Line, Ctx#ctx.module},
-                   {integer, Line, Ctx#ctx.line},
-                   {atom, Line, Ctx#ctx.function},
-                   {integer, Line, Ctx#ctx.arity},
-                   {integer, Line, Ctx#ctx.fun_index},
-                   {integer, Line, Ctx#ctx.fun_arity}]}.
+    {tuple, Line, [{atom, Line, erlog_ctx},
+                   {atom, Line, Ctx#erlog_ctx.category},
+                   {atom, Line, Ctx#erlog_ctx.max_level},
+                   {string, Line, Ctx#erlog_ctx.file},
+                   {atom, Line, Ctx#erlog_ctx.module},
+                   {integer, Line, Ctx#erlog_ctx.line},
+                   {atom, Line, Ctx#erlog_ctx.function},
+                   {integer, Line, Ctx#erlog_ctx.arity},
+                   {integer, Line, Ctx#erlog_ctx.fun_index},
+                   {integer, Line, Ctx#erlog_ctx.fun_arity}]}.
