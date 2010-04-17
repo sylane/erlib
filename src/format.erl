@@ -1,6 +1,6 @@
 %% ===========================================================================
-%% @doc        TODO: Add module format documenation.
-%% @since      08/12/2009
+%% @doc        Utility functions for string formating.
+%% @since      Dec 12, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
 %% @authors    Sebastien Merle <s.merle@gmail.com>
@@ -17,7 +17,7 @@
 %%   * Redistributions in binary form must reproduce the above copyright
 %%     notice, this list of conditions and the following disclaimer in the
 %%     documentation and/or other materials provided with the distribution.
-%%   * Neither the name of "eflusion" nor the names of its contributors may be
+%%   * Neither the name of "erlib" nor the names of its contributors may be
 %%     used to endorse or promote products derived from this software without
 %%     specific prior written permission.
 %%
@@ -48,6 +48,7 @@
 %% API exports
 -export([ip_address/1,
          peer/1]).
+
 
 %% ====================================================================
 %% API Functions

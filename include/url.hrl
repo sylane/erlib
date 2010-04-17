@@ -1,5 +1,5 @@
 %% ===========================================================================
-%% Copyright (c) 2009, Sébastien Merle <s.merle@gmail.com>
+%% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
 %% All rights reserved.
 %%
 %% Redistribution and use in source and binary forms, with or without

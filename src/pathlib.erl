@@ -17,7 +17,7 @@
 %%   * Redistributions in binary form must reproduce the above copyright
 %%     notice, this list of conditions and the following disclaimer in the
 %%     documentation and/or other materials provided with the distribution.
-%%   * Neither the name of "eflusion" nor the names of its contributors may be
+%%   * Neither the name of "erlib" nor the names of its contributors may be
 %%     used to endorse or promote products derived from this software without
 %%     specific prior written permission.
 %%
@@ -35,6 +35,7 @@
 %% ===========================================================================
 
 -module(pathlib).
+
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
@@ -50,6 +51,7 @@
 %% API exports
 -export([cleanup/1,
          absname/1, absname/2]).
+
 
 %% ====================================================================
 %% API Functions
@@ -77,6 +79,7 @@ absname(Path) -> cleanup(filename:absname(Path)).
 %% --------------------------------------------------------------------
 absname(Path, Dir) -> cleanup(filename:absname(Path, Dir)).
 
+
 %% ====================================================================
 %% Local Functions
 %% ====================================================================
@@ -88,6 +91,7 @@ cleanup_path([".." |Es], [".." |_] = Acc) -> cleanup_path(Es, [".." |Acc]);
 cleanup_path([".." |Es], [_ |Acc]) -> cleanup_path(Es, Acc);
 cleanup_path(["." |Es], Acc) -> cleanup_path(Es, Acc);
 cleanup_path([E |Es], Acc) -> cleanup_path(Es, [E |Acc]).
+
 
 %% ====================================================================
 %% Tests

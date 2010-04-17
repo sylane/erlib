@@ -1,5 +1,5 @@
 %% ===========================================================================
-%% @doc        TODO: Add module timelib documentation.
+%% @doc        Utility functions for time manipulation.
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -35,6 +35,7 @@
 %% ===========================================================================
 
 -module(timelib).
+
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
@@ -48,6 +49,7 @@
 %% API exports
 -export([now/0,
          to_string/1]).
+
 
 %% ====================================================================
 %% API Functions
@@ -66,7 +68,8 @@ now() ->
 %% --------------------------------------------------------------------
 to_string({{Y, M, D}, {H, Mi, S}, MS}) ->
     io_lib:format("~4..0B/~2..0B/~2..0B ~2..0B:~2..0B:~2..0B,~6..0B",
-				  [Y, M, D, H, Mi, S, MS]).
+                  [Y, M, D, H, Mi, S, MS]).
+
 
 %% ====================================================================
 %% Local Functions

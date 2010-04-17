@@ -1,5 +1,5 @@
 %% ===========================================================================
-%% @doc        TODO: Add module optlib documentation.
+%% @doc        Utility functions for option list manipulation.
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -17,7 +17,7 @@
 %%   * Redistributions in binary form must reproduce the above copyright
 %%     notice, this list of conditions and the following disclaimer in the
 %%     documentation and/or other materials provided with the distribution.
-%%   * Neither the name of "eflusion" nor the names of its contributors may be
+%%   * Neither the name of "erlib" nor the names of its contributors may be
 %%     used to endorse or promote products derived from this software without
 %%     specific prior written permission.
 %%
@@ -35,6 +35,7 @@
 %% ===========================================================================
 
 -module(optlib).
+
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
@@ -48,6 +49,7 @@
 %% API exports
 -export([contains/2,
          set_defaults/2]).
+
 
 %% ====================================================================
 %% API Functions
@@ -80,6 +82,7 @@ set_defaults({_Name, _Value} = Opt, Opts) ->
     set_default(Opt, Opts);
 set_defaults(Opt, Opts) when is_atom(Opt) ->
     set_default(Opt, Opts).
+
 
 %% ====================================================================
 %% Local Functions

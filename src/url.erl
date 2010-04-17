@@ -37,6 +37,7 @@
 %% ===========================================================================
 
 -module(url).
+
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
@@ -63,6 +64,7 @@
          add_to_query/3,
          extend_query/2,
          format_location/1]).
+
 
 %% ===================================================================
 %% API Functions
@@ -155,6 +157,7 @@ extend_query([{Key, Val} |Pairs], Url) ->
 %% --------------------------------------------------------------------
 format_location(#url{path = P, qry = Q}) ->
     format_url(string, #url{path = P, qry = Q}).
+
 
 %% ====================================================================
 %% Local Functions
@@ -447,6 +450,7 @@ parse_frag(Full, [C |T], Url, Acc) ->
 
 set_frag(Url, Acc) ->
     Url#url{frag = rfc_decode(lists:reverse(Acc))}.
+
 
 %% ====================================================================
 %% Tests
