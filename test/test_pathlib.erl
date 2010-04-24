@@ -1,6 +1,6 @@
 %% ===========================================================================
-%% @doc        Utility functions for file path manipulation.
-%% @since      Nov 28, 2009
+%% @doc        Module pathlib unit tests.
+%% @since      Apr 24, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
 %% @authors    Sebastien Merle <s.merle@gmail.com>
@@ -34,54 +34,48 @@
 %% POSSIBILITY OF SUCH DAMAGE.
 %% ===========================================================================
 
--module(pathlib).
+-module(test_pathlib).
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
-%% Exports
+%% Includes
 %% --------------------------------------------------------------------
 
-%% API exports
--export([cleanup/1,
-         absname/1, absname/2]).
+-include_lib("eunit/include/eunit.hrl").
+
+%% --------------------------------------------------------------------
+%% Imports
+%% --------------------------------------------------------------------
+
+-import(pathlib, [cleanup/1]).
 
 
 %% ====================================================================
-%% API Functions
+%% Unit Tests
 %% ====================================================================
 
-%% --------------------------------------------------------------------
-%% Cleanup the specified path.
-%%   "X/Y/../Z" -> "X/Z"
-%%   "X/./Y" -> "X/Y"
-%%   "X//Y" -> "X/Y"
-%%   "X/Y/" -> "X/Y"
--spec cleanup(string()) -> string().
-%% --------------------------------------------------------------------
-cleanup(Path) -> cleanup_path(filename:split(Path), []).
-
-%% --------------------------------------------------------------------
-%% Same as filename:absname/1 but it cleans up the path.
--spec absname(string()) -> string().
-%% --------------------------------------------------------------------
-absname(Path) -> cleanup(filename:absname(Path)).
-
-%% --------------------------------------------------------------------
-%% Same as filename:absname/2 but it cleans up the path.
--spec absname(string(), string()) -> string().
-%% --------------------------------------------------------------------
-absname(Path, Dir) -> cleanup(filename:absname(Path, Dir)).
-
-
-%% ====================================================================
-%% Local Functions
-%% ====================================================================
-
-cleanup_path([], []) -> [];
-cleanup_path([], Acc) -> filename:join(lists:reverse(Acc));
-cleanup_path([".." |Es], []) -> cleanup_path(Es, [".."]);
-cleanup_path([".." |Es], [".." |_] = Acc) -> cleanup_path(Es, [".." |Acc]);
-cleanup_path([".." |Es], [_ |Acc]) -> cleanup_path(Es, Acc);
-cleanup_path(["." |Es], Acc) -> cleanup_path(Es, Acc);
-cleanup_path([E |Es], Acc) -> cleanup_path(Es, [E |Acc]).
+cleanup_test() ->
+    ?assertEqual("", cleanup("")),
+    ?assertEqual("/", cleanup("/")),
+    ?assertEqual("c:/", cleanup("c:/")),
+    ?assertEqual("/a/b/c", cleanup("/a/b/c/")),
+    ?assertEqual("/a/b/c", cleanup("/a/b/c")),
+    ?assertEqual("a/b/c", cleanup("a/b/c")),
+    ?assertEqual("a/b/c", cleanup("a/b/c/")),
+    ?assertEqual("a/c", cleanup("a/b/../c")),
+    ?assertEqual("c", cleanup("a/../b/../c")),
+    ?assertEqual("../c", cleanup("a/../../b/../c")),
+    ?assertEqual("../c", cleanup("a/../b/../../c")),
+    ?assertEqual("../c", cleanup("../a/../b/../c")),
+    ?assertEqual("../../../c", cleanup("../../../c")),
+    ?assertEqual("../../c", cleanup("../../a/../c")),
+    ?assertEqual("..", cleanup("../c/..")),
+    ?assertEqual("", cleanup(".")),
+    ?assertEqual("", cleanup("./")),
+    ?assertEqual("", cleanup("./.")),
+    ?assertEqual("", cleanup("././")),
+    ?assertEqual("a/b/c", cleanup("./a/./b/./c")),
+    ?assertEqual("", cleanup("./c/..")),
+    ?assertEqual("a/b/c", cleanup("a//b//c//")),
+    ok.
