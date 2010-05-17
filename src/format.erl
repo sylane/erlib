@@ -57,6 +57,8 @@
 ip_address({P1, P2, P3, P4}) ->
     io_lib:format("~w.~w.~w.~w", [P1, P2, P3, P4]).
 
+peer({tcp, {_, _} = TCPPeer}) ->
+    peer(TCPPeer);
 peer({Address, Port}) ->
     io_lib:format("~s:~w", [ip_address(Address), Port]).
 
