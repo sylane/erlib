@@ -27,8 +27,8 @@
 %% POSSIBILITY OF SUCH DAMAGE.
 %% ===========================================================================
 
--ifndef(IS_URL_INCLUDED).
--define(IS_URL_INCLUDED, true).
+-ifndef(IS_NAVTREE_INCLUDED).
+-define(IS_NAVTREE_INCLUDED, true).
 
 %% --------------------------------------------------------------------
 %% Macros
@@ -39,15 +39,15 @@
 
 % Macros to use in pattern matching
 -define(NAVTREE_MATCH_ROOT(), #?NAVTREE_RECNAME{indexes = []}).
--define(NAVTREE_MATCH_LEAF(), #?NAVTREE_RECNAME{current = {_, {}}}).
--define(NAVTREE_MATCH_CURRENT(N), #?NAVTREE_RECNAME{current = {N, _}}).
+-define(NAVTREE_MATCH_LEAF(), #?NAVTREE_RECNAME{childs = {}}).
+-define(NAVTREE_MATCH_CURRENT(N), #?NAVTREE_RECNAME{current = N}).
 
 %% --------------------------------------------------------------------
 %% Records
 %% --------------------------------------------------------------------
 
 % Made public but should not be used directly, only with the given macros
--record(?NAVTREE_RECNAME, {current, indexes, branches}).
+-record(?NAVTREE_RECNAME, {current, childs, indexes, branches}).
 
 %% --------------------------------------------------------------------
 %% Types

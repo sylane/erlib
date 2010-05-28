@@ -80,18 +80,18 @@
 %% @doc Creates a new tree with the specified root node.
 -spec new(Root::term()) -> Tree::navtree().
 %% --------------------------------------------------------------------
-new(Root) -> #?St{current = {Root, {}}, indexes = [], branches = []}.
+new(Root) -> #?St{current = Root, childs = {}, indexes = [], branches = []}.
 
 %% --------------------------------------------------------------------
 %% @doc Tells if the cursor is on the tree root.
--spec is_root(Tree::navtree()) -> IsRoot::bool().
+-spec is_root(Tree::navtree()) -> IsRoot::boolean().
 %% --------------------------------------------------------------------
 is_root(?NAVTREE_MATCH_ROOT()) -> true;
 is_root(_)                     -> false.
 
 %% --------------------------------------------------------------------
 %% @doc Tells if the cursor is on a leaf.
--spec is_leaf(Tree::navtree()) -> IsLeaf::bool().
+-spec is_leaf(Tree::navtree()) -> IsLeaf::boolean().
 %% --------------------------------------------------------------------
 is_leaf(?NAVTREE_MATCH_LEAF()) -> true;
 is_leaf(_)                     -> false.
@@ -100,7 +100,7 @@ is_leaf(_)                     -> false.
 %% @doc Gives the number of child of the current node.
 -spec get_child_count(Tree::navtree()) -> Count::pos_integer().
 %% --------------------------------------------------------------------
-get_child_count(#?St{current = {_, Childs}}) -> size(Childs).
+get_child_count(#?St{childs = Childs}) -> size(Childs).
 
 %% --------------------------------------------------------------------
 %% @doc Gives the path to the current node.
@@ -122,9 +122,10 @@ go_top(Tree)                         -> go_top(go_up(Tree)).
 go_up(?NAVTREE_MATCH_ROOT()) ->
     erlang:error(no_parent);
 go_up(Tree) ->
-    #?St{current = Curr, indexes = [I |Is], branches = [{E, C} |Bs]} = Tree,
-    NewChilds = erlang:setelement(I, C, Curr),
-    Tree#?St{current = {E, NewChilds}, indexes = Is, branches = Bs}.
+    #?St{current = Curr, childs = Childs,
+         indexes = [I |Is], branches = [{E, C} |Bs]} = Tree,
+    NewChilds = erlang:setelement(I, C, {Curr, Childs}),
+    Tree#?St{current = E, childs = NewChilds, indexes = Is, branches = Bs}.
 
 %% --------------------------------------------------------------------
 %% @doc Moves the cursor to one of the current node child.
@@ -133,9 +134,10 @@ go_up(Tree) ->
 go_down(_Index, ?NAVTREE_MATCH_LEAF()) ->
     erlang:error(no_child);
 go_down(Index, Tree) ->
-    #?St{current = {_, Childs} = Curr, indexes = Is, branches = Bs} = Tree,
-    NewCurr = element(Index, Childs),
-    Tree#?St{current = NewCurr, indexes = [Index |Is], branches = [Curr |Bs]}.
+    #?St{current = Curr, childs = Childs, indexes = Is, branches = Bs} = Tree,
+    {NewCurr, NewChilds} = element(Index, Childs),
+    Tree#?St{current = NewCurr, childs = NewChilds,
+             indexes = [Index |Is], branches = [{Curr, Childs} |Bs]}.
 
 %% --------------------------------------------------------------------
 %% @doc Moves the cursor to the specified path.
@@ -154,17 +156,17 @@ get_current(?NAVTREE_MATCH_CURRENT(Curr)) -> Curr.
 -spec update_current(NewNodeValue::term(), Tree::navtree()) ->
         {OldNodeValue::term(), NewTree::navtree()}.
 %% --------------------------------------------------------------------
-update_current(Node, #?St{current = {OldNode, Childs}} = Tree) ->
-    {OldNode, Tree#?St{current = {Node, Childs}}}.
+update_current(NewNode, #?St{current = OldNode} = Tree) ->
+    {OldNode, Tree#?St{current = NewNode}}.
 
 %% --------------------------------------------------------------------
 %% @doc Adds a child node to the current node.
 -spec add_child(ChildNode::term(), Tree::navtree()) ->
         {ChildIndex::navtree_index(), NewTree::navtree()}.
 %% --------------------------------------------------------------------
-add_child(Child, #?St{current = {Node, Childs}} = Tree) ->
+add_child(Child, #?St{childs = Childs} = Tree) ->
     NewChilds = erlang:append_element(Childs, {Child, {}}),
-    {size(NewChilds), Tree#?St{current = {Node, NewChilds}}}.
+    {size(NewChilds), Tree#?St{childs = NewChilds}}.
 
 
 %% ====================================================================
