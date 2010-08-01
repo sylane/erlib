@@ -47,7 +47,8 @@
 
 %% API exports
 -export([net_address/1,
-         peer/1, peer/2]).
+         peer/1, peer/2,
+         version/1]).
 
 
 %% ====================================================================
@@ -66,6 +67,9 @@ peer({Address, Port}) ->
 
 peer(Address, Port) ->
     io_lib:format("~s:~w", [net_address(Address), Port]).
+
+version({Maj, Min}) ->
+    io_lib:format("~w.~w", [Maj, Min]).
 
 
 %% ====================================================================
