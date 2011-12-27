@@ -50,18 +50,20 @@
 %% Imports
 %% --------------------------------------------------------------------
 
--import(navtree, [new/1,
+-import(navtree, [new/1, new/2,
                   is_root/1,
                   is_leaf/1,
-                  get_child_count/1,
+                  get_count/1,
                   get_path/1,
                   go_path/2,
                   go_top/1,
                   go_up/1,
                   go_down/2,
-                  get_current/1,
-                  update_current/2,
-                  add_child/2]).
+                  get_node/1,
+				  get_id/1,
+                  update_node/2,
+                  add_child/2, add_child/3,
+				  remove_child/2]).
 
 %% --------------------------------------------------------------------
 %% Exports
@@ -100,62 +102,141 @@ coverage() ->
 
 basic_test() ->
     test_list(new(root),
-              [                     mk_check_full(root, true, true, [], 0),
-               mk_add_child(a1, 1), mk_check_full(root, true, false, [], 1),
-               mk_add_child(a2, 2), mk_check_full(root, true, false, [], 2),
-               mk_add_child(a3, 3), mk_check_full(root, true, false, [], 3),
-               mk_go_down(2),       mk_check_full(a2, false, true, [2], 0),
-               mk_add_child(b1, 1), mk_check_full(a2, false, false, [2], 1),
-               mk_add_child(b2, 2), mk_check_full(a2, false, false, [2], 2),
-               mk_go_down(1),       mk_check_full(b1, false, true, [2, 1], 0),
-               mk_add_child(c1, 1), mk_check_full(b1, false, false, [2, 1], 1),
-               mk_add_child(c2, 2), mk_check_full(b1, false, false, [2, 1], 2),
-               mk_add_child(c3, 3), mk_check_full(b1, false, false, [2, 1], 3),
-               mk_go_down(3),       mk_check(c3, [2, 1, 3], 0),
-               mk_update(c3u, c3),  mk_check(c3u, [2, 1, 3], 0),
-               mk_go_up(),          mk_check(b1, [2, 1], 3),
-               mk_update(b1u, b1),  mk_check(b1u, [2, 1], 3),
-               mk_go_down(2),       mk_check(c2, [2, 1, 2], 0),
-               mk_go_up(),          mk_check(b1u, [2, 1], 3),
-               mk_go_down(3),       mk_check(c3u, [2, 1, 3], 0),
-               mk_go_top(),         mk_check(root, [], 3),
-               mk_go_down(3),       mk_check(a3, [3], 0),
-               mk_add_child(d1, 1), mk_check(a3, [3], 1),
-               mk_add_child(d2, 2), mk_check(a3, [3], 2),
-               mk_add_child(d3, 3), mk_check(a3, [3], 3),
-               mk_go_down(1),       mk_check(d1, [3, 1], 0),
-               mk_add_child(e1, 1), mk_check(d1, [3, 1], 1),
-               mk_go_down(1),       mk_check(e1, [3, 1, 1], 0),
-               mk_add_child(f1, 1), mk_check(e1, [3, 1, 1], 1),
-               mk_add_child(f2, 2), mk_check(e1, [3, 1, 1], 2),
-               mk_go_down(2),       mk_check(f2, [3, 1, 1, 2], 0),
-               mk_add_child(g1, 1), mk_check(f2, [3, 1, 1, 2], 1),
-               mk_go_down(1),       mk_check(g1, [3, 1, 1, 2, 1], 0),
-               mk_update(g1u, g1),  mk_check(g1u, [3, 1, 1, 2, 1], 0),
-               mk_go_up(),          mk_check(f2, [3, 1, 1, 2], 1),
-               mk_go_up(),          mk_check(e1, [3, 1, 1], 2),
-               mk_go_down(1),       mk_check(f1, [3, 1, 1, 1], 0),
-               mk_update(f1u, f1),  mk_check(f1u, [3, 1, 1, 1], 0),
-               mk_go_up(),          mk_check(e1, [3, 1, 1], 2),
-               mk_go_up(),          mk_check(d1, [3, 1], 1),
-               mk_add_child(e2, 2), mk_check(d1, [3, 1], 2),
-               mk_go_up(),          mk_check(a3, [3], 3),
-               mk_update(a3u, a3),  mk_check(a3u, [3], 3),
-               mk_go_top(),         mk_check(root, [], 3),
-               mk_update(r, root),  mk_check(r, [], 3),
-               mk_go_path([2, 1, 3]),        mk_check(c3u, [2, 1, 3], 0),
-               mk_go_path([3, 1, 1, 2, 1]),  mk_check(g1u, [3, 1, 1, 2, 1], 0),
-               mk_go_path([2, 1]),           mk_check(b1u, [2, 1], 3),
-               mk_go_path([3, 1, 1, 1]),     mk_check(f1u, [3, 1, 1, 1], 0),
-               mk_go_path([3]),              mk_check(a3u, [3], 3),
-               mk_go_path([]),               mk_check(r, [], 3),
-               mk_go_path([3, 1, 2]),        mk_check(e2, [3, 1, 2], 0),
-               mk_add_child(h1, 1), mk_check(e2, [3, 1, 2], 1),
-               mk_add_child(h2, 2), mk_check(e2, [3, 1, 2], 2),
-               mk_go_path([1]),              mk_check(a1, [1], 0),
-               mk_update(a1u, a1),  mk_check(a1u, [1], 0),
-               mk_go_path([3, 1, 2, 2]),     mk_check(h2, [3, 1, 2, 2], 0)
+              [mk_check_full(root, true, true, [], 0),
+               mk_add_child(a1, 1),
+			   mk_check_full(root, true, false, [], 1),
+               mk_add_child(a2, 2),
+			   mk_check_full(root, true, false, [], 2),
+               mk_add_child(a3, 3),
+			   mk_check_full(root, true, false, [], 3),
+               mk_go_down(2),
+			   mk_check_full(a2, false, true, [2], 0),
+               mk_add_child(b1, 1),
+			   mk_check_full(a2, false, false, [2], 1),
+               mk_add_child(b2, 2),
+			   mk_check_full(a2, false, false, [2], 2),
+               mk_go_down(1),
+			   mk_check_full(b1, false, true, [2, 1], 0),
+               mk_add_child(c1, 1),
+			   mk_check_full(b1, false, false, [2, 1], 1),
+               mk_add_child(c2, 2),
+			   mk_check_full(b1, false, false, [2, 1], 2),
+               mk_add_child(c3, 3),
+			   mk_check_full(b1, false, false, [2, 1], 3),
+               mk_go_down(3),
+			   mk_check(c3, [2, 1, 3], 0),
+               mk_update(c3u),
+			   mk_check(c3u, [2, 1, 3], 0),
+               mk_go_up(),
+			   mk_check(b1, [2, 1], 3),
+               mk_update(b1u),
+			   mk_check(b1u, [2, 1], 3),
+               mk_go_down(2),
+			   mk_check(c2, [2, 1, 2], 0),
+               mk_go_up(),
+			   mk_check(b1u, [2, 1], 3),
+               mk_go_down(3),
+			   mk_check(c3u, [2, 1, 3], 0),
+               mk_go_top(),
+			   mk_check(root, [], 3),
+               mk_go_down(3),
+			   mk_check(a3, [3], 0),
+               mk_add_child(d1, 1),
+			   mk_check(a3, [3], 1),
+               mk_add_child(d2, 2),
+			   mk_check(a3, [3], 2),
+               mk_add_child(d3, 3),
+			   mk_check(a3, [3], 3),
+               mk_go_down(1),
+			   mk_check(d1, [3, 1], 0),
+               mk_add_child(e1, 1),
+			   mk_check(d1, [3, 1], 1),
+               mk_go_down(1),
+			   mk_check(e1, [3, 1, 1], 0),
+               mk_add_child(f1, 1),
+			   mk_check(e1, [3, 1, 1], 1),
+               mk_add_child(f2, 2),
+			   mk_check(e1, [3, 1, 1], 2),
+               mk_go_down(2),
+			   mk_check(f2, [3, 1, 1, 2], 0),
+               mk_add_child(g1, 1),
+			   mk_check(f2, [3, 1, 1, 2], 1),
+               mk_go_down(1),
+			   mk_check(g1, [3, 1, 1, 2, 1], 0),
+               mk_update(g1u),
+			   mk_check(g1u, [3, 1, 1, 2, 1], 0),
+               mk_go_up(),
+			   mk_check(f2, [3, 1, 1, 2], 1),
+               mk_go_up(),
+			   mk_check(e1, [3, 1, 1], 2),
+               mk_go_down(1),
+			   mk_check(f1, [3, 1, 1, 1], 0),
+               mk_update(f1u),
+			   mk_check(f1u, [3, 1, 1, 1], 0),
+               mk_go_up(),
+			   mk_check(e1, [3, 1, 1], 2),
+               mk_go_up(),
+			   mk_check(d1, [3, 1], 1),
+               mk_add_child(e2, 2),
+			   mk_check(d1, [3, 1], 2),
+               mk_go_up(),
+			   mk_check(a3, [3], 3),
+               mk_update(a3u),
+			   mk_check(a3u, [3], 3),
+               mk_go_top(),
+			   mk_check(root, [], 3),
+               mk_update(r),
+			   mk_check(r, [], 3),
+               mk_go_path([2, 1, 3]),
+			   mk_check(c3u, [2, 1, 3], 0),
+               mk_go_path([3, 1, 1, 2, 1]),
+			   mk_check(g1u, [3, 1, 1, 2, 1], 0),
+               mk_go_path([2, 1]),
+			   mk_check(b1u, [2, 1], 3),
+               mk_go_path([3, 1, 1, 1]),
+			   mk_check(f1u, [3, 1, 1, 1], 0),
+               mk_go_path([3]),
+			   mk_check(a3u, [3], 3),
+               mk_go_path([]),
+			   mk_check(r, [], 3),
+               mk_go_path([3, 1, 2]),
+			   mk_check(e2, [3, 1, 2], 0),
+               mk_add_child(h1, 1),
+			   mk_check(e2, [3, 1, 2], 1),
+               mk_add_child(h2, 2),
+			   mk_check(e2, [3, 1, 2], 2),
+               mk_go_path([1]),
+			   mk_check(a1, [1], 0),
+               mk_update(a1u),
+			   mk_check(a1u, [1], 0),
+               mk_go_path([3, 1, 2, 2]),
+			   mk_check(h2, [3, 1, 2, 2], 0)
                ]).
+
+atom_test() ->
+    test_list(new(r, root),
+              [mk_check(root, [], 0),
+               mk_add_child("A1", a1),
+			   mk_check(root, [], 1),
+			   mk_add_child("A2", a2),
+               mk_add_child("A3", a3),
+			   mk_check(root, [], 3),
+			   mk_go_down(a2),
+               mk_check("A2", [a2], 0),
+			   mk_add_child("B1", b1),
+               mk_add_child("B2", b2),
+			   mk_check("A2", [a2], 2),
+			   mk_go_down(b2),
+			   mk_check("B2", [a2, b2], 0),
+			   mk_add_child("C1", c1),
+			   mk_check("B2", [a2, b2], 1),
+			   mk_go_path([a2]),
+			   mk_check("A2", [a2], 2),
+			   mk_remove_child(b1),
+			   mk_check("A2", [a2], 1),
+			   mk_go_path([a2, b2]),
+			   mk_check("B2", [a2, b2], 1)
+			   ]).
 
 
 %% ====================================================================
@@ -181,8 +262,8 @@ mk_check_full(ExpChild, ExpIsRoot, ExpIsLeaf, ExpPath, ExpChildCount) ->
                     ?assertEqual(false, is_leaf(T))
             end,
             ?assertMatch(?NAVTREE_MATCH_CURRENT(ExpChild), T),
-            ?assertEqual(ExpChild, get_current(T)),
-            ?assertEqual(ExpChildCount, get_child_count(T)),
+            ?assertEqual(ExpChild, get_node(T)),
+            ?assertEqual(ExpChildCount, get_count(T)),
             ?assertEqual(ExpPath, get_path(T)),
             T
     end.
@@ -190,18 +271,23 @@ mk_check_full(ExpChild, ExpIsRoot, ExpIsLeaf, ExpPath, ExpChildCount) ->
 mk_check(ExpChild, ExpPath, ExpChildCount) ->
     fun(T) ->
             ?assertMatch(?NAVTREE_MATCH_CURRENT(ExpChild), T),
-            ?assertEqual(ExpChild, get_current(T)),
-            ?assertEqual(ExpChildCount, get_child_count(T)),
+            ?assertEqual(ExpChild, get_node(T)),
+            ?assertEqual(ExpChildCount, get_count(T)),
             ?assertEqual(ExpPath, get_path(T)),
             T
     end.
 
-mk_add_child(Child, ExpChildIdx) ->
+mk_add_child(Child, Id) ->
     fun(T0) ->
-            Result = add_child(Child, T0),
-            ?assertMatch({ExpChildIdx, _}, Result),
+            Result = add_child(Id, Child, T0),
+            ?assertMatch({Id, _}, Result),
             {_, T} = Result,
             T
+    end.
+
+mk_remove_child(Id) ->
+    fun(T0) ->
+            remove_child(Id, T0)
     end.
 
 mk_go_down(Index) ->
@@ -216,12 +302,9 @@ mk_go_top() ->
 mk_go_path(Path) ->
     fun(T) -> go_path(Path, T) end.
 
-mk_update(Value, Expected) ->
+mk_update(Value) ->
     fun(T) ->
-            Result = update_current(Value, T),
-            ?assertMatch({Expected, _}, Result),
-            {_, NewT} = Result,
-            NewT
+            update_node(Value, T)
     end.
 
 test_list(_Tree, []) -> ok;

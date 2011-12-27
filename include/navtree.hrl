@@ -38,23 +38,23 @@
 -define(NAVTREE_RECNAME, navtree).
 
 % Macros to use in pattern matching
--define(NAVTREE_MATCH_ROOT(), #?NAVTREE_RECNAME{indexes = []}).
--define(NAVTREE_MATCH_LEAF(), #?NAVTREE_RECNAME{childs = {}}).
--define(NAVTREE_MATCH_CURRENT(N), #?NAVTREE_RECNAME{current = N}).
+-define(NAVTREE_MATCH_ROOT(), #?NAVTREE_RECNAME{ids = []}).
+-define(NAVTREE_MATCH_LEAF(), #?NAVTREE_RECNAME{children = []}).
+-define(NAVTREE_MATCH_CURRENT(N), #?NAVTREE_RECNAME{node = N}).
 
 %% --------------------------------------------------------------------
 %% Records
 %% --------------------------------------------------------------------
 
 % Made public but should not be used directly, only with the given macros
--record(?NAVTREE_RECNAME, {current, childs, indexes, branches}).
+-record(?NAVTREE_RECNAME, {id, node, children, ids, stack}).
 
 %% --------------------------------------------------------------------
 %% Types
 %% --------------------------------------------------------------------
 
 -type navtree() :: #?NAVTREE_RECNAME{}.
--type navtree_index() :: pos_integer().
--type navtree_path() :: [navtree_index()].
+-type navtree_id() :: term().
+-type navtree_path() :: [navtree_id()].
 
 -endif.
