@@ -39,7 +39,9 @@
 %% --------------------------------------------------------------------
 
 -type orddict()  :: [{term(), term()}].
--type url_path() :: [abs |[string()]] | [rel |[string()]].
+-type url_path_item() :: abs | rel | string().
+% in truce 'abs' and 'rel' must be the first element of the list
+-type url_path() :: [url_path_item()].
 
 %% --------------------------------------------------------------------
 %% Records

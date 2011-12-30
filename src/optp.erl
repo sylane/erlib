@@ -501,8 +501,8 @@ parse_failed(_P, E, M) -> throw({optp_error, E, M}).
 
 opt_desc(_, #opt{short = undefined, long = Long}) -> "--" ++ Long;
 opt_desc(_, #opt{short = Short, long = undefined}) -> "-" ++ Short;
-opt_desc(help, #opt{short = Short, long = Long}) ->
-    io_lib:format("-~s, --~s", [Short, Long]);
+%% opt_desc(help, #opt{short = Short, long = Long}) ->
+%%     io_lib:format("-~s, --~s", [Short, Long]);
 opt_desc(compact, #opt{short = Short, long = Long}) ->
     io_lib:format("-~s/--~s", [Short, Long]).
 
