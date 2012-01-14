@@ -1,11 +1,12 @@
 %% ===========================================================================
-%% @doc        Tree structure with a cursor pointing to a node, where moving
-%%             the cursor to the node node parent or children, updating
-%%             node node value and adding child nodes are O(1) operations.
+%% @doc Tree structure with a cursor pointing to a node, where moving
+%% the cursor to the node node parent or children, updating
+%% node node value and adding child nodes are O(1) operations.
+%%
 %% @since      May 15, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -40,11 +41,13 @@
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
+
 %% --------------------------------------------------------------------
 %% Includes
 %% --------------------------------------------------------------------
 
 -include("navtree.hrl").
+
 
 %% --------------------------------------------------------------------
 %% Exports
@@ -66,6 +69,7 @@
          add_child/2, add_child/3,
          remove_child/2]).
 
+
 %% --------------------------------------------------------------------
 %% Macros
 %% --------------------------------------------------------------------
@@ -80,55 +84,70 @@
 
 %% --------------------------------------------------------------------
 %% @doc Creates a new tree with the specified root node.
+
 -spec new(Root::term()) -> Tree::navtree().
-%% --------------------------------------------------------------------
+
 new(Root) ->
     new(root, Root).
 
+
 %% --------------------------------------------------------------------
 %% @doc Creates a new tree with the specified root node.
+
 -spec new(Id::navtree_id(), Root::term()) -> Tree::navtree().
-%% --------------------------------------------------------------------
+
 new(Id, Root) ->
     #?St{id=Id, node = Root, children = [], ids = [], stack = []}.
 
+
 %% --------------------------------------------------------------------
 %% @doc Tells if the cursor is on the tree root.
+
 -spec is_root(Tree::navtree()) -> IsRoot::boolean().
-%% --------------------------------------------------------------------
+
 is_root(?NAVTREE_MATCH_ROOT()) -> true;
 is_root(_)                     -> false.
 
+
 %% --------------------------------------------------------------------
 %% @doc Tells if the cursor is on a leaf.
+
 -spec is_leaf(Tree::navtree()) -> IsLeaf::boolean().
-%% --------------------------------------------------------------------
+
 is_leaf(?NAVTREE_MATCH_LEAF()) -> true;
 is_leaf(_)                     -> false.
 
+
 %% --------------------------------------------------------------------
 %% @doc Gives the number of child of the node node.
+
 -spec get_count(Tree::navtree()) -> Count::pos_integer().
-%% --------------------------------------------------------------------
+
 get_count(#?St{children = Children}) -> length(Children).
+
 
 %% --------------------------------------------------------------------
 %% @doc Gives the path to the node node.
+
 -spec get_path(Tree::navtree()) -> Path::navtree_path().
-%% --------------------------------------------------------------------
+
 get_path(#?St{id = Id, ids = Ids}) -> tl(lists:reverse([Id |Ids])).
+
 
 %% --------------------------------------------------------------------
 %% @doc Moves the cursor to the tree root.
+
 -spec go_top(Tree::navtree()) -> NewTree::navtree().
-%% --------------------------------------------------------------------
+
 go_top(?NAVTREE_MATCH_ROOT() = Tree) -> Tree;
 go_top(Tree)                         -> go_top(go_up(Tree)).
 
+
 %% --------------------------------------------------------------------
 %% @doc Moves the cursor to the node node parent.
+
 -spec go_up(Tree::navtree()) -> NewTree::navtree().
-%% --------------------------------------------------------------------
+
 go_up(?NAVTREE_MATCH_ROOT()) ->
     erlang:error(no_parent);
 go_up(Tree) ->
@@ -138,10 +157,12 @@ go_up(Tree) ->
     Tree#?St{id = ParentId, node = Parent, children = NewChildren,
              ids = Is, stack = Bs}.
 
+
 %% --------------------------------------------------------------------
 %% @doc Moves the cursor to one of the node node child.
+
 -spec go_down(Id::navtree_id(), Tree::navtree()) -> NewTree::navtree().
-%% --------------------------------------------------------------------
+
 go_down(_Id, ?NAVTREE_MATCH_LEAF()) ->
     erlang:error(no_child);
 go_down(Id, Tree) ->
@@ -151,54 +172,69 @@ go_down(Id, Tree) ->
     Tree#?St{id = NewId, node = NewNode, children = NewChildren,
              ids = [CurrId |Is], stack = [{CurrNode, CurrChildren} |Bs]}.
 
+
 %% --------------------------------------------------------------------
 %% @doc Moves the cursor to the specified path.
+
 -spec go_path(Path::navtree_path(), Tree::navtree()) -> NewTree::navtree().
-%% --------------------------------------------------------------------
+
 go_path(Path, Tree) -> intern_go(go_top(Tree), Path).
 
-%% --------------------------------------------------------------------
-%% @doc Gives the node node value.
--spec get_id(Tree::navtree()) -> NodeId::navtree_id().
-%% --------------------------------------------------------------------
-get_id(#?St{id = Id}) -> Id.
 
 %% --------------------------------------------------------------------
 %% @doc Gives the node node value.
--spec get_node(Tree::navtree()) -> NodeValue::term().
+
+-spec get_id(Tree::navtree()) -> NodeId::navtree_id().
+
+get_id(#?St{id = Id}) -> Id.
+
+
 %% --------------------------------------------------------------------
+%% @doc Gives the node node value.
+
+-spec get_node(Tree::navtree()) -> NodeValue::term().
+
 get_node(?NAVTREE_MATCH_CURRENT(Curr)) -> Curr.
+
 
 %% --------------------------------------------------------------------
 %% @doc Updates the node node value.
+
 -spec update_node(NewNodeValue::term(), Tree::navtree()) ->
           NewTree::navtree().
-%% --------------------------------------------------------------------
+
 update_node(NewNode, Tree) ->
     Tree#?St{node = NewNode}.
+
 
 %% --------------------------------------------------------------------
 %% @doc Adds a child node to the current node using erlang:make_ref()
 %%      to create a unique identifier.
+
 -spec add_child(Node::term(), Tree::navtree()) ->
           {ChildId::navtree_id(), NewTree::navtree()}.
-%% --------------------------------------------------------------------
+
 add_child(Node, Tree) ->
     add_child(erlang:mak_ref(), Node, Tree).
 
+
 %% --------------------------------------------------------------------
 %% @doc Adds a child node with specified identifier.
+
 -spec add_child(Id::term(), Node::term(), Tree::navtree()) ->
           {ChildId::navtree_id(), NewTree::navtree()}.
-%% --------------------------------------------------------------------
+
+
 add_child(Id, Node, #?St{children = Children} = Tree) ->
     {Id, Tree#?St{children = [{Id, Node, []} |Children]}}.
 
+
 %% --------------------------------------------------------------------
 %% @doc Removes the child node with specified identifier.
+
 -spec remove_child(Id::term(), Tree::navtree()) ->
           NewTree::navtree().
-%% --------------------------------------------------------------------
+
 remove_child(Id, #?St{children = Children} = Tree) ->
     NewChildren = lists:keydelete(Id, 1, Children),
     Tree#?St{children = NewChildren}.

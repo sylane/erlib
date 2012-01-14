@@ -3,7 +3,7 @@
 %% @since      Apr 24, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -38,17 +38,20 @@
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
+
 %% --------------------------------------------------------------------
 %% includes
 %% --------------------------------------------------------------------
 
 -include_lib("eunit/include/eunit.hrl").
 
+
 %% --------------------------------------------------------------------
 %% Imports
 %% --------------------------------------------------------------------
 
 -import(opts, [split/1]).
+
 
 %% ===================================================================
 %% Unit Tests

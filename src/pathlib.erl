@@ -3,7 +3,7 @@
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -38,6 +38,7 @@
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
+
 %% --------------------------------------------------------------------
 %% Exports
 %% --------------------------------------------------------------------
@@ -52,25 +53,32 @@
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Cleanup the specified path.
-%%   "X/Y/../Z" -> "X/Z"
-%%   "X/./Y" -> "X/Y"
-%%   "X//Y" -> "X/Y"
-%%   "X/Y/" -> "X/Y"
+%% @doc Cleanup the specified path.
+%% <ul> 
+%%   <li>"X/Y/../Z" -> "X/Z"</li>
+%%   <li>"X/./Y" -> "X/Y"</li>
+%%   <li>"X//Y" -> "X/Y"</li>
+%%   <li>"X/Y/" -> "X/Y"</li>
+%% </ul>
+
 -spec cleanup(string()) -> string().
-%% --------------------------------------------------------------------
+
 cleanup(Path) -> cleanup_path(filename:split(Path), []).
 
-%% --------------------------------------------------------------------
-%% Same as filename:absname/1 but it cleans up the path.
--spec absname(string()) -> string().
-%% --------------------------------------------------------------------
-absname(Path) -> cleanup(filename:absname(Path)).
 
 %% --------------------------------------------------------------------
-%% Same as filename:absname/2 but it cleans up the path.
--spec absname(string(), string()) -> string().
+%% @doc Same as filename:absname/1 but it cleans up the path.
+
+-spec absname(string()) -> string().
+
+absname(Path) -> cleanup(filename:absname(Path)).
+
+
 %% --------------------------------------------------------------------
+%% @doc Same as filename:absname/2 but it cleans up the path.
+
+-spec absname(string(), string()) -> string().
+
 absname(Path, Dir) -> cleanup(filename:absname(Path, Dir)).
 
 

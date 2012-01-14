@@ -3,7 +3,7 @@
 %% @since      Dec 12, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -37,9 +37,6 @@
 -module(format).
 -author('Sebastien Merle <s.merle@gmail.com>').
 
-%% --------------------------------------------------------------------
-%% Includes
-%% --------------------------------------------------------------------
 
 %% --------------------------------------------------------------------
 %% Exports
@@ -70,9 +67,3 @@ peer(Address, Port) ->
 
 version({Maj, Min}) ->
     io_lib:format("~w.~w", [Maj, Min]).
-
-
-%% ====================================================================
-%% Internal Functions
-%% ====================================================================
-

@@ -3,7 +3,7 @@
 %% @since      Apr 17, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -82,8 +82,8 @@
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Starts and links an erlog logger process.
-%% --------------------------------------------------------------------
+%% @doc Starts and links an erlog logger process.
+
 start_link() ->
     gen_server:start_link({local, erlog}, ?MODULE, {}, []).
 
@@ -93,41 +93,45 @@ start_link() ->
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Called whenever the logger is started.
-%% --------------------------------------------------------------------
+%% @doc Called whenever the logger is started.
+
 init({}) ->
     {ok, none}.
 
+
 %% --------------------------------------------------------------------
-%% Called when receiving a request sent using gen_server:call.
-%% --------------------------------------------------------------------
+%% @doc Called when receiving a request sent using gen_server:call.
+
 handle_call(_Request, _From, _State) ->
     erlang:error(not_expected).
 
+
 %% --------------------------------------------------------------------
-%% Called when receiving a request sent using gen_server:cast.
-%% --------------------------------------------------------------------
+%% @doc Called when receiving a request sent using gen_server:cast.
+
 handle_cast({log, #erlog_entry{} = Entry}, State) ->
     ok = console_logging(Entry),
     {noreply, State};
 handle_cast(_Msg, _State) ->
     erlang:error(not_expected).
 
+
 %% --------------------------------------------------------------------
-%% Called when receiving any other messages.
-%% --------------------------------------------------------------------
+%% @doc Called when receiving any other messages.
+
 handle_info(_Info, _State) ->
     erlang:error(not_expected).
 
+
 %% --------------------------------------------------------------------
-%% Called when the logger process is about to termintes.
-%% --------------------------------------------------------------------
+%% @doc Called when the logger process is about to termintes.
+
 terminate(_Reason, _State) ->
     ok.
 
 %% --------------------------------------------------------------------
-%% Called when the logger process should update its internal state.
-%% --------------------------------------------------------------------
+%% @doc Called when the logger process should update its internal state.
+
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 

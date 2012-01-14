@@ -3,7 +3,7 @@
 %% @since      May 07, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -38,9 +38,6 @@
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
-%% --------------------------------------------------------------------
-%% Includes
-%% --------------------------------------------------------------------
 
 %% --------------------------------------------------------------------
 %% Exports
@@ -49,7 +46,8 @@
 %% API exports
 -export([parse_host/1,
          response_code/1,
-         response_message/1]).
+         response_message/1,
+         combined_header/1]).
 
 
 %% ===================================================================
@@ -57,9 +55,12 @@
 %% ====================================================================
 
 %% --------------------------------------------------------------------
+%% @spec parse_host(Host::list()) -> {string(), integer() | undefined}
+%%
 %% @doc Parses HTTP 'Host' header.
+
 -spec parse_host(list()) -> {string(), integer() | undefined}.
-%% --------------------------------------------------------------------
+
 parse_host(Host) ->
     case string:tokens(Host, ":") of
         [Name] -> {Name, undefined};
@@ -68,9 +69,12 @@ parse_host(Host) ->
 
 
 %% --------------------------------------------------------------------
+%% @spec response_code(atom() | integer()) -> integer()
+%%
 %% @doc Gives HTTP response code for the specified response atom.
+
 -spec response_code(atom() | integer()) -> integer().
-%% --------------------------------------------------------------------
+
 response_code(ok)                              -> 200;
 response_code(created)                         -> 201;
 response_code(accepted)                        -> 202;
@@ -114,10 +118,14 @@ response_code(insufficient_storage_space)      -> 507;
 response_code(not_extended)                    -> 510;
 response_code(Code) when is_integer(Code)      -> Code.
 
+
 %% --------------------------------------------------------------------
+%% @spec response_message(atom() | string()) -> string()
+%%
 %% @doc Gives HTTP response message for the specified response atom.
+
 -spec response_message(atom() | string()) -> string().
-%% --------------------------------------------------------------------
+
 % 2XX:
 response_message(ok)                     -> "OK";
 response_message(created)                -> "Created";
@@ -170,6 +178,36 @@ response_message(insufficient_storage_space)
 response_message(not_extended)           -> "Not Extended".
 
 
-%% ====================================================================
-%% Local Functions
-%% ====================================================================
+%% --------------------------------------------------------------------
+%% @spec combined_header(atom()) -> boolean()
+%%
+%% @doc Returns is specified header is a combined header that could 
+%% be specified multiple times. A list of all headers should be used instead
+%% of just the last one.
+
+-spec combined_header(atom()) -> boolean().
+
+combined_header('accept') -> true;
+combined_header('accept-charset') -> true;
+combined_header('accept-encoding') -> true;
+combined_header('accept-language') -> true;
+combined_header('accept-ranges') -> true;
+combined_header('allow') -> true;
+combined_header('cache-control') -> true;
+combined_header('connection') -> true;
+combined_header('content-encoding') -> true;
+combined_header('content-language') -> true;
+combined_header('expect') -> true;
+combined_header('pragma') -> true;
+combined_header('proxy-authenticate') -> true;
+combined_header('te') -> true;
+combined_header('trailer') -> true;
+combined_header('transfer-encoding') -> true;
+combined_header('upgrade') -> true;
+combined_header('via') -> true;
+combined_header('warning') -> true;
+combined_header('www-authenticate') -> true;
+% Extensions for wmw
+combined_header('x-accept-authentication') -> true;
+combined_header('supported') -> true;
+combined_header(_) -> false.

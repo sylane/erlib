@@ -3,7 +3,7 @@
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -39,10 +39,6 @@
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
-%% Includes
-%% --------------------------------------------------------------------
-
-%% --------------------------------------------------------------------
 %% Exports
 %% --------------------------------------------------------------------
 
@@ -55,9 +51,6 @@
 %% API Functions
 %% ====================================================================
 
-%% --------------------------------------------------------------------
-%% TODO: Add description of function contains/2
-%% --------------------------------------------------------------------
 contains([], _Opts) -> true;
 contains([Opt |Rest], Opts) ->
     case contains(Opt, Opts) of
@@ -72,9 +65,6 @@ contains({Name, _DefVal}, Opts) ->
 contains(Name, Opts) when is_atom(Name) ->
     lists:member(Name, Opts).
 
-%% --------------------------------------------------------------------
-%% TODO: Add description of function set_defaults/2
-%% --------------------------------------------------------------------
 set_defaults([], Opts) -> Opts;
 set_defaults([Opt |Rest], Opts) ->
     set_defaults(Rest, set_defaults(Opt, Opts));

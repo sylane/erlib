@@ -3,7 +3,7 @@
 %% @since      Apr 17, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -40,6 +40,7 @@
 
 -behaviour(supervisor).
 
+
 %% --------------------------------------------------------------------
 %% Exports
 %% --------------------------------------------------------------------
@@ -56,8 +57,8 @@
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Starts and links the logging process supervisor.
-%% --------------------------------------------------------------------
+%% @doc Starts and links the logging process supervisor.
+
 start_link() -> supervisor:start_link(?MODULE, {}).
 
 
@@ -66,8 +67,8 @@ start_link() -> supervisor:start_link(?MODULE, {}).
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Called whenever the supervisor is started.
-%% --------------------------------------------------------------------
+%% @doc Called whenever the supervisor is started.
+
 init({}) ->
     LoggerSpec = {erlog_logger, {erlog_logger, start_link, []},
                   permanent, 2000, worker, [erlog_logger]},

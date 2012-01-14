@@ -1,21 +1,23 @@
 %% ===========================================================================
-%% @doc        Erlang line logger.
-%%             Uses erlang parse_transform to log context information like
-%%             file, funtion, arity, and line number along with the log level,
-%%             pid and time.
-%%             A log category can be specified with the module attribute
-%%             erlog_category or set at runtime for the active process.
-%%             The category will be used in the futur to filter the log lines
-%%             at runtime.
-%%             A log name can be specified at runtime for the active process
-%%             to differentiate the log entries.
-%%             The module attribute erlog_max_level can be set to remove
-%%             the log function calls at build time when the log level
-%%             is higher than the specified one.
+%% @doc Erlang line logger.
+%%
+%% Uses erlang parse_transform to log context information like
+%% file, funtion, arity, and line number along with the log level,
+%% pid and time.
+%% A log category can be specified with the module attribute
+%% erlog_category or set at runtime for the active process.
+%% The category will be used in the futur to filter the log lines
+%% at runtime.
+%% A log name can be specified at runtime for the active process
+%% to differentiate the log entries.
+%% The module attribute erlog_max_level can be set to remove
+%% the log function calls at build time when the log level
+%% is higher than the specified one.
+%%
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -52,12 +54,14 @@
 
 -behaviour(application).
 
+
 %% --------------------------------------------------------------------
 %% Includes
 %% --------------------------------------------------------------------
 
 -define(NO_ERLOG_PARSE_TRANSFORM, true).
 -include("erlog.hrl").
+
 
 %% --------------------------------------------------------------------
 %% Exports
@@ -92,38 +96,46 @@
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Starts the erlog application.
+%% @doc Starts the erlog application.
+
 -spec start() -> ok | {error, Reason::term()}.
-%% --------------------------------------------------------------------
+
 start() -> application:start(erlog).
 
-%% --------------------------------------------------------------------
-%% Stops the erlog application.
--spec stop() -> ok | {error, Reason::term()}.
-%% --------------------------------------------------------------------
-stop() -> application:stop(erlog).
 
 %% --------------------------------------------------------------------
-%% Override the module log category for the active process.
-%% The log category will be use in the future to filter log line at runtime.
--spec set_category(atom()) -> any().
+%% @doc Stops the erlog application.
+
+-spec stop() -> ok | {error, Reason::term()}.
+
+stop() -> application:stop(erlog).
+
+
 %% --------------------------------------------------------------------
+%% @doc Override the module log category for the active process.
+%% The log category will be use in the future to filter log line at runtime.
+
+-spec set_category(atom()) -> any().
+
 set_category(Category) ->
     put(erlog_category, Category).
 
+
 %% --------------------------------------------------------------------
-%% Set the logging name for the active process.
+%% @doc Set the logging name for the active process.
 %% The log name apear in each log line after the logging category
 %% and can be used to discriminate them with context information
 %% like IP, username...
+
 -spec set_name(atom()) -> any().
-%% --------------------------------------------------------------------
+
 set_name(Name) ->
     put(erlog_name, Name).
 
+
 %% --------------------------------------------------------------------
-%% Gives a string label for the specified logging level.
-%% --------------------------------------------------------------------
+%% @doc Gives a string label for the specified logging level.
+
 lvl2lbl(log) -> "LOG";
 lvl2lbl(debug) -> "DEBUG";
 lvl2lbl(info) -> "INFO";
@@ -131,9 +143,10 @@ lvl2lbl(warn) -> "WARN";
 lvl2lbl(error) -> "ERROR";
 lvl2lbl(none) -> "NONE".
 
+
 %% --------------------------------------------------------------------
-%% Gives the logging level as an integer.
-%% --------------------------------------------------------------------
+%% @doc Gives the logging level as an integer.
+
 lvl2num(log) -> 5;
 lvl2num(debug) -> 4;
 lvl2num(info) -> 3;
@@ -141,9 +154,10 @@ lvl2num(warn) -> 2;
 lvl2num(error) -> 1;
 lvl2num(none) -> 0.
 
+
 %% --------------------------------------------------------------------
-%% Compatibility functions used when parse_transform has not been used.
-%% --------------------------------------------------------------------
+%% @doc Compatibility functions used when parse_transform has not been used.
+
 log(Msg) -> publish(log, Msg, undefined).
 log(Msg, Vars) -> publish(log, Msg, Vars, undefined).
 debug(Msg) -> publish(debug, Msg, undefined).
@@ -155,18 +169,22 @@ warn(Msg, Vars) -> publish(warn, Msg, Vars, undefined).
 error(Msg) -> publish(error, Msg, undefined).
 error(Msg, Vars) -> publish(error, Msg, Vars, undefined).
 
+
 %% --------------------------------------------------------------------
-%% Functions publish/3 calls are generated by the parse_transform.
+%% @doc Functions publish/3 calls are generated by the parse_transform.
+
 -spec publish(log_level(), string(), #erlog_ctx{} | undefined) -> any().
-%% --------------------------------------------------------------------
+
 publish(Lvl, Msg, Ctx) ->
     publish(Lvl, Msg, undefined, Ctx).
 
+
 %% --------------------------------------------------------------------
-%% Functions publish/3 calls are generated by the parse_transform.
+%% @doc Functions publish/3 calls are generated by the parse_transform.
+
 -spec publish(log_level(), string(), list() | undefined,
 			  #erlog_ctx{} | undefined) -> any().
-%% --------------------------------------------------------------------
+
 publish(Lvl, Msg, Vars, Ctx) ->
     Entry = #erlog_entry{level = Lvl,
                          pid = self(),
@@ -178,12 +196,13 @@ publish(Lvl, Msg, Vars, Ctx) ->
                          ctx = Ctx},
     gen_server:cast(erlog, {log, Entry}).
 
+
 %% --------------------------------------------------------------------
-%% Parses a module AST and changes the remote calls to the erlog module's
+%% @doc Parses a module AST and changes the remote calls to the erlog module's
 %% function log, debug, info, war and error to call to the publish function
 %% adding a context record that contains information like file, function
 %% arity and line number.
-%% --------------------------------------------------------------------
+
 parse_transform(Ast, _Options) ->
   {NewAst, _NewCtx} = parse_ast(Ast, #erlog_ctx{}),
   NewAst.
@@ -194,13 +213,14 @@ parse_transform(Ast, _Options) ->
 %% ====================================================================
 
 %% --------------------------------------------------------------------
-%% Called whenever the application is started.
-%% --------------------------------------------------------------------
+%% @doc Called whenever the application is started.
+
 start(_Type, []) -> erlog_sup:start_link().
 
+
 %% --------------------------------------------------------------------
-%% Called whenever the application has stopped.
-%% --------------------------------------------------------------------
+%% @doc Called whenever the application has stopped.
+
 stop(_State) -> ok.
 
 

@@ -5,7 +5,7 @@
 %% @since      Dec 05, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -40,11 +40,13 @@
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
+
 %% --------------------------------------------------------------------
 %% Includes
 %% --------------------------------------------------------------------
 
 -include("url.hrl").
+
 
 %% --------------------------------------------------------------------
 %% Exports
@@ -70,89 +72,110 @@
 
 %% --------------------------------------------------------------------
 %% @doc Creates a new URL with default values.
+
 -spec new() -> url().
-%% --------------------------------------------------------------------
+
 new() -> #url{}.
+
 
 %% --------------------------------------------------------------------
 %% @doc Formats the specified URL as a string.
+
 -spec format(Url::url()) -> string().
-%% --------------------------------------------------------------------
+
 format(Url) -> format_url(string, Url).
+
 
 %% --------------------------------------------------------------------
 %% @doc Creates a new URL by parsing a RFC1738 string representation.
+
 -spec parse(UrlStr::string()) -> url().
-%% --------------------------------------------------------------------
+
 parse(UrlStr) -> parse_url(UrlStr).
+
 
 %% --------------------------------------------------------------------
 %% @doc Adds a path segment to the end of the specified URL's path.
+
 -spec add_to_path(Segment::string(), Url::url()) -> url().
-%% --------------------------------------------------------------------
+
 add_to_path(Segment, #url{path = Path} = Url) ->
     Url#url{path = Path ++ [Segment]}.
+
 
 %% --------------------------------------------------------------------
 %% @doc Extends the path segments of the specified URL with the specified
 %%      path segments.
+
 -spec extend_path([Segment::string()], Url::url()) -> url().
-%% --------------------------------------------------------------------
+
 extend_path(Segments, #url{path = Path} = Url) ->
     Url#url{path = Path ++ Segments}.
+
 
 %% --------------------------------------------------------------------
 %% @doc Lookups specified URL's query string for a specified key.
 %%      If the key is not found it raise a bad_arg error.
+
 -spec lookup_query(Key::string(), Url::url()) -> [string()].
-%% --------------------------------------------------------------------
+
 lookup_query(_Key, #url{qry = undefined}) -> erlang:error(badarg);
 lookup_query(Key, #url{qry = Qry}) -> orddict:fetch(Key, Qry).
+
 
 %% --------------------------------------------------------------------
 %% @doc Lookups specified URL's query string for a specified key.
 %%      If the key is not found the specified default value is returned.
+
 -spec lookup_query(Key::string(), Def, Url::url()) -> [string()] | Def.
-%% --------------------------------------------------------------------
+
 lookup_query(_Key, Default, #url{qry = undefined}) -> Default;
 lookup_query(Key, Default, #url{qry = Qry}) ->
     try ordict:fetch(Key, Qry) catch
         error:badarg -> Default
     end.
 
+
 %% --------------------------------------------------------------------
 %% @doc Calls the specified function on successive keys and values pairs
 %%      of the specified URL query string.
+
 -type fold_query_fun() :: fun((Key::string(), Val::string(),
                                Acc::term()) -> term()).
 -spec fold_query(Fun::fold_query_fun(), Acc0::term(), Url::url()) -> term().
-%% --------------------------------------------------------------------
+
 fold_query(_Fun, Acc0, #url{qry = undefined}) -> Acc0;
 fold_query(Fun, Acc0, #url{qry = Qry}) -> orddict:fold(Fun, Acc0, Qry).
 
+
 %% --------------------------------------------------------------------
 %% @doc Adds a key/value paire to the specified URL's query string.
+
 -spec add_to_query(Key::string(), Value::string(), Url::url()) -> url().
-%% --------------------------------------------------------------------
+
 add_to_query(Key, Val, #url{qry = undefined} = Url) ->
     Url#url{qry = orddict:append(Key, Val, orddict:new())};
 add_to_query(Key, Val, #url{qry = Qry} = Url) ->
     Url#url{qry = orddict:append(Key, Val, Qry)}.
 
+
 %% --------------------------------------------------------------------
 %% @doc Extends the query string of the specified URL with the specified
 %%      key/value paires.
+
 -spec extend_query([{Key::string(), Value::string()}], Url::url()) -> url().
-%% --------------------------------------------------------------------
+
 extend_query([], Url) -> Url;
 extend_query([{Key, Val} |Pairs], Url) ->
     extend_query(Pairs, add_to_query(Key, Val, Url)).
 
+
 %% --------------------------------------------------------------------
 %% @doc Formats the location part of the specified URL as a string.
 %%      The location is the non-qualified URL (without scheme and domain).
+
 -spec format_location(Url::url()) -> string().
-%% --------------------------------------------------------------------
+
 format_location(#url{path = P, qry = Q}) ->
     format_url(string, #url{path = P, qry = Q}).
 

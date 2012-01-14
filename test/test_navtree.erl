@@ -3,7 +3,7 @@
 %% @since      May 15, 2010
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -38,6 +38,7 @@
 
 -author('Sebastien Merle <s.merle@gmail.com>').
 
+
 %% --------------------------------------------------------------------
 %% Includes
 %% --------------------------------------------------------------------
@@ -45,6 +46,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -include("navtree.hrl").
+
 
 %% --------------------------------------------------------------------
 %% Imports
@@ -64,6 +66,7 @@
                   update_node/2,
                   add_child/2, add_child/3,
 				  remove_child/2]).
+
 
 %% --------------------------------------------------------------------
 %% Exports

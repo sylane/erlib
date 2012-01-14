@@ -3,7 +3,7 @@
 %% @since      Nov 28, 2009
 %% @version    1.0
 %% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
-%% @authors    Sebastien Merle <s.merle@gmail.com>
+%% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
 %% Copyright (c) 2009, Sebastien Merle <s.merle@gmail.com>
@@ -39,10 +39,6 @@
 -author('Sebastien Merle <s.merle@gmail.com>').
 
 %% --------------------------------------------------------------------
-%% Includes
-%% --------------------------------------------------------------------
-
-%% --------------------------------------------------------------------
 %% Exports
 %% --------------------------------------------------------------------
 
@@ -55,17 +51,11 @@
 %% API Functions
 %% ====================================================================
 
-%% --------------------------------------------------------------------
-%% TODO: Add description of function now/0
-%% --------------------------------------------------------------------
 now() ->
     Now = erlang:now(),
     {D, T} = calendar:now_to_datetime(Now),
     {D, T, element(3, Now)}.
 
-%% --------------------------------------------------------------------
-%% TODO: Add description of function to_string/1
-%% --------------------------------------------------------------------
 to_string({{Y, M, D}, {H, Mi, S}, MS}) ->
     io_lib:format("~4..0B/~2..0B/~2..0B ~2..0B:~2..0B:~2..0B,~6..0B",
                   [Y, M, D, H, Mi, S, MS]).
