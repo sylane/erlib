@@ -2,7 +2,7 @@
 %% @doc        Erlog logger process supervisor.
 %% @since      Apr 17, 2010
 %% @version    1.0
-%% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
+%% @copyright  2009, Sebastien Merle <s.merle@gmail.com>
 %% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%

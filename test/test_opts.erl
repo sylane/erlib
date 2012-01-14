@@ -2,7 +2,7 @@
 %% @doc        Module opts unit tests.
 %% @since      Apr 24, 2010
 %% @version    1.0
-%% @copyright  (c) 2009, Sebastien Merle <s.merle@gmail.com>
+%% @copyright  2009, Sebastien Merle <s.merle@gmail.com>
 %% @author     Sebastien Merle <s.merle@gmail.com>
 %% @end
 %%
