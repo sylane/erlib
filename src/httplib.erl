@@ -187,27 +187,24 @@ response_message(not_extended)           -> "Not Extended".
 
 -spec combined_header(atom()) -> boolean().
 
-combined_header('accept') -> true;
-combined_header('accept-charset') -> true;
-combined_header('accept-encoding') -> true;
-combined_header('accept-language') -> true;
-combined_header('accept-ranges') -> true;
-combined_header('allow') -> true;
-combined_header('cache-control') -> true;
-combined_header('connection') -> true;
-combined_header('content-encoding') -> true;
-combined_header('content-language') -> true;
-combined_header('expect') -> true;
-combined_header('pragma') -> true;
-combined_header('proxy-authenticate') -> true;
-combined_header('te') -> true;
-combined_header('trailer') -> true;
-combined_header('transfer-encoding') -> true;
-combined_header('upgrade') -> true;
-combined_header('via') -> true;
-combined_header('warning') -> true;
-combined_header('www-authenticate') -> true;
-% Extensions for wmw
-combined_header('x-accept-authentication') -> true;
-combined_header('supported') -> true;
+combined_header('Accept') -> true;
+combined_header('Accept-Charset') -> true;
+combined_header('Accept-Encoding') -> true;
+combined_header('Accept-Language') -> true;
+combined_header('Allow') -> true;
+combined_header('Cache-Control') -> true;
+combined_header('Connection') -> true;
+combined_header('Content-Encoding') -> true;
+combined_header('Content-Language') -> true;
+combined_header('Expect') -> true;
+combined_header('Pragma') -> true;
+combined_header('Proxy-Authenticate') -> true;
+combined_header('Transfer-Encoding') -> true;
+combined_header('Upgrade') -> true;
+combined_header('Via') -> true;
+combined_header('Warning') -> true;
+combined_header('Www-Authenticate') -> true;
+combined_header(<<"Accept-Ranges">>) -> true;
+combined_header(<<"Te">>) -> true;
+combined_header(<<"Trailer">>) -> true;
 combined_header(_) -> false.
